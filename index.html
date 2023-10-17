@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>d.week6</title>
+    <style type="text/css">
+
+        @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap');
+        body {
+            font-family: 'Pixelify Sans', cursive;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            height: 100vh;
+        }
+        #colorNameInput {
+            position: absolute;
+            top: 700px; /* 텍스트 박스 상단 위치 조정 */
+            left: 48.5%; /* 가운데 정렬을 위해 사용 */
+            transform: translateX(-50%); /* 가운데 정렬을 위해 사용 */
+            display: none;
+        }
+        #colorNameLabel {
+            position: absolute;
+            top: 660px; /* 텍스트 박스 바깥 상단 위치 조정 */
+            left: 50%; /* 가운데 정렬을 위해 사용 */
+            transform: translateX(-50%); /* 가운데 정렬을 위해 사용 */
+            font-size: 18px;
+            color: white;
+            display: none;
+        }
+        #coordinateText {
+            position: absolute;
+            top: 10px; /* 좌표 텍스트 상단 위치 조정 */
+            left: 10px;
+            color: blue;
+            line-height: 130%;
+            font-size: 80px;
+        }
+        #submitButton {
+            position: absolute;
+            top: 700px;
+            left: calc(50% + 80px); /* 텍스트 박스의 오른쪽에 위치하도록 조정 */
+            transform: translateX(-50%);
+            padding: 1px 5px; /* 버튼의 세로 크기 조정 */
+            cursor: pointer;
+            display: none;
+        }#reButton {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px 40px;
+            cursor: pointer;
+            display: none;
+            border-radius: 50%;
+            font-size: 3rem;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+    window.onload = function() {
+        alert("클릭해서 가장 마음에 드는 색을 포착해보세요!");
+
+        var textContainer = document.createElement("div");
+        textContainer.id = "coordinateText";
+        document.body.appendChild(textContainer);
+
+        var canvas = document.createElement("canvas");
+        canvas.id = "graphCanvas";
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        var colorNameLabel = document.createElement("div");
+        colorNameLabel.id = "colorNameLabel";
+        colorNameLabel.innerText = "이 색상의 이름을 정해주세요!";
+        
+        var colorNameInput = document.createElement("input");
+        colorNameInput.type = "text";
+        colorNameInput.id = "colorNameInput";
+        colorNameInput.placeholder = "아무렇게나 적어봐요!";
+
+        var submitButton = document.createElement("button");
+        submitButton.id = "submitButton";
+        submitButton.innerText = "입력";
+        submitButton.addEventListener("click", function() {
+            textContainer.innerHTML = colorNameInput.value;
+            showReButton();
+        });
+
+        var reButton = document.createElement("button");
+        reButton.id = "reButton";
+        reButton.innerText = "RE";
+        reButton.addEventListener("click", function() {
+            resetPage();
+        });
+
+        document.body.appendChild(canvas);
+        document.body.appendChild(colorNameLabel);
+        document.body.appendChild(colorNameInput);
+        document.body.appendChild(submitButton);
+        document.body.appendChild(reButton);
+
+        var ctx = canvas.getContext("2d");
+
+        var isClicked = false;
+        var graphPosition = { x: 0, y: 0 };
+
+        window.onmousemove = function(e) {
+            if (!isClicked) {
+                var canvasRect = canvas.getBoundingClientRect();
+                var mouseX = e.clientX - canvasRect.left;
+                var mouseY = e.clientY - canvasRect.top;
+
+                textContainer.innerHTML =
+                    "clientX = " + e.clientX + "<br>" +
+                    "clientY = " + e.clientY + "<br>" +
+                    "scrollX = " + window.scrollX + "<br>" +
+                    "scrollY = " + window.scrollY + "<br>" +
+                    "timeStamp = " + e.timeStamp;
+
+                var red = e.clientX % 256;
+                var green = (e.clientY + e.clientX) % 256;
+                var blue = e.clientY % 100;
+                document.body.style.backgroundColor = "rgb(" + red + "," + green + "," + blue + ")";
+
+                // Draw graph at the mouse coordinates
+                graphPosition = { x: mouseX, y: mouseY };
+                drawGraph(ctx, graphPosition.x, graphPosition.y);
+            }
+        };
+
+        window.onclick = function(e) {
+            isClicked = true;
+            var canvasRect = canvas.getBoundingClientRect();
+            var clickX = e.clientX - canvasRect.left;
+            var clickY = e.clientY - canvasRect.top;
+
+            drawCircle(ctx, clickX, clickY);
+            colorNameLabel.style.display = "block";
+            colorNameInput.style.display = "block";
+            submitButton.style.display = "block";
+        };
+    };
+
+    function drawGraph(ctx, x, y) {
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(ctx.canvas.width, y);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, ctx.canvas.height);
+        ctx.strokeStyle = "blue";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x, y, 8, 0, 2 * Math.PI);
+        ctx.fillStyle = "blue";
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    function drawCircle(ctx, x, y) {
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, 2 * Math.PI);
+        ctx.fillStyle = "blue";
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    function showReButton() {
+        var reButton = document.getElementById("reButton");
+        reButton.style.display = "block";
+    }
+
+    function resetPage() {
+        window.location.reload();
+    }
+</script>
+
+</body>
+</html>
